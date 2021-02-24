@@ -50,4 +50,52 @@ class DataBaseHandler(var context : Context) : SQLiteOpenHelper(context, DATABAS
 
 
     }
+
+    fun readList() : MutableList<User>{
+        var list_db : MutableList<User> = ArrayList()
+        val db = this.readableDatabase
+        val query = "Select * from " + TABLE_NAME
+        val result = db.rawQuery(query,null)
+        if (result.moveToFirst()){
+            do {
+                var user = User()
+                user.id = result.getString(result.getColumnIndex(COL_ID)).toInt()
+                user.name = result.getString(result.getColumnIndex(COL_NAME))
+                user.age = result.getString(result.getColumnIndex(COL_AGE)).toInt()
+                list_db.add(user)
+
+            }while (result.moveToNext())
+        }
+
+
+        result.close()
+        db.close()
+
+        return list_db
+    }
+
+    fun deleteData(){
+        val db = this.writableDatabase
+        db.delete(TABLE_NAME, COL_ID+"=?", arrayOf(6.toString()))
+        db.close()
+    }
+
+    fun updateData(){
+        val db = this.writableDatabase
+        val query = "Select * from " + TABLE_NAME
+        val result = db.rawQuery(query,null)
+            if (result.moveToFirst()){
+                do {
+                        var cv = ContentValues()
+                    cv.put(COL_AGE , (result.getInt(result.getColumnIndex(COL_AGE))+10000))
+                    db.update(TABLE_NAME,cv, COL_ID + "=? AND " + COL_NAME + "=?" ,
+                    arrayOf(result.getString(result.getColumnIndex(COL_ID)),
+                            result.getString(result.getColumnIndex(COL_NAME))))
+
+
+                }while (result.moveToNext())
+            }
+        result.close()
+        db.close()
+    }
 }
